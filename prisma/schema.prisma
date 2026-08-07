@@ -1,13 +1,78 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("Employee")
+  createdAt DateTime @default(now())
+
+  createdTasks  Task[] @relation("CreatedTasks")
+  assignedTasks Task[] @relation("AssignedTasks")
+
+  calendarEvents CalendarEvent[]
+  requests       Request[]
+  messages       Message[]
+}
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+
+  status      String   @default("Pending")
+  priority    String   @default("Medium")
+  dueDate     DateTime?
+
+  createdBy   Int
+  assignedTo  Int?
+
+  creator User @relation("CreatedTasks", fields: [createdBy], references: [id])
+  assignee User? @relation("AssignedTasks", fields: [assignedTo], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model CalendarEvent {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+
+  createdBy   Int
+  user         User @relation(fields: [createdBy], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+model Request {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  type        String
+  status      String   @default("Pending")
+
+  requestedBy Int
+  user        User @relation(fields: [requestedBy], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id          Int      @id @default(autoincrement())
+  subject     String
+  content     String
+
+  senderId    Int
+  sender      User @relation(fields: [senderId], references: [id])
+
+  createdAt   DateTime @default(now())
 }
