@@ -14,19 +14,65 @@ model User {
   password  String
   role      String   @default("Employee")
   createdAt DateTime @default(now())
-  tasks Task[]
-}
 
+  createdTasks  Task[] @relation("CreatedTasks")
+  assignedTasks Task[] @relation("AssignedTasks")
+
+  calendarEvents CalendarEvent[]
+  requests       Request[]
+  messages       Message[]
+}
 model Task {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
+
   status      String   @default("Pending")
   priority    String   @default("Medium")
   dueDate     DateTime?
 
-  assignedTo Int
-  user User @relation(fields: [assignedTo], references: [id])
+  createdBy   Int
+  assignedTo  Int?
+
+  creator User @relation("CreatedTasks", fields: [createdBy], references: [id])
+  assignee User? @relation("AssignedTasks", fields: [assignedTo], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+model CalendarEvent {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+
+  createdBy   Int
+  user         User @relation(fields: [createdBy], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+model Request {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  type        String
+  status      String   @default("Pending")
+
+  requestedBy Int
+  user        User @relation(fields: [requestedBy], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id          Int      @id @default(autoincrement())
+  subject     String
+  content     String
+
+  senderId    Int
+  sender      User @relation(fields: [senderId], references: [id])
+
+  createdAt   DateTime @default(now())
 }
