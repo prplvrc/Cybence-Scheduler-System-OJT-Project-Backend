@@ -1,119 +1,55 @@
-import prisma from "../config/prisma.js";
+import { PrismaClient } from "@prisma/client";
 
-export const createRequest = async (requestData) => {
-    return await prisma.request.create({
-        data: {
-            title: requestData.title,
-            description: requestData.description,
-            type: requestData.type,
-            status: requestData.status || "Pending",
-            requestedBy: Number(requestData.requestedBy)
-        },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true
-                }
-            }
-        }
-    });
-};
-
+const prisma = new PrismaClient();
 
 export const getAllRequests = async () => {
-    return await prisma.request.findMany({
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true
-                }
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        }
-    });
+  return await prisma.request.findMany({
+    include: {
+      user: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 };
-
 
 export const getRequestById = async (id) => {
-    return await prisma.request.findUnique({
-        where: {
-            id: Number(id)
-        },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true
-                }
-            }
-        }
-    });
+  return await prisma.request.findUnique({
+    where: { id: Number(id) },
+    include: {
+      user: true,
+    },
+  });
 };
 
-
-export const updateRequest = async (id, requestData) => {
-    return await prisma.request.update({
-        where: {
-            id: Number(id)
-        },
-        data: {
-            title: requestData.title,
-            description: requestData.description,
-            type: requestData.type,
-            status: requestData.status
-        },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true
-                }
-            }
-        }
-    });
+export const createRequest = async (data) => {
+  return await prisma.request.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      type: data.type,
+      status: data.status || "Pending",
+      requestedBy: Number(data.requestedBy),
+    },
+  });
 };
 
+export const updateRequest = async (id, data) => {
+  return await prisma.request.update({
+    where: { id: Number(id) },
+    data,
+  });
+};
 
 export const deleteRequest = async (id) => {
-    return await prisma.request.delete({
-        where: {
-            id: Number(id)
-        }
-    });
+  return await prisma.request.delete({
+    where: { id: Number(id) },
+  });
 };
 
-
-export const approveRequest = async (id) => {
-    return await prisma.request.update({
-        where: {
-            id: Number(id)
-        },
-        data: {
-            status: "Approved"
-        }
-    });
-};
-
-
-export const rejectRequest = async (id) => {
-    return await prisma.request.update({
-        where: {
-            id: Number(id)
-        },
-        data: {
-            status: "Rejected"
-        }
-    });
+export const updateStatus = async (id, status) => {
+  return await prisma.request.update({
+    where: { id: Number(id) },
+    data: { status },
+  });
 };

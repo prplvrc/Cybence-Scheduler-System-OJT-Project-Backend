@@ -1,15 +1,10 @@
 import * as dashboardService from "../services/dashboard.service.js";
 
+// Make sure `export` is present before `const getDashboardStats`
 export const getDashboardStats = async (req, res, next) => {
     try {
-
         const stats = await dashboardService.getDashboardStats();
-
-        return res.status(200).json({
-            success: true,
-            data: stats
-        });
-
+        return res.status(200).json({ success: true, data: stats });
     } catch (error) {
         next(error);
     }
@@ -17,14 +12,8 @@ export const getDashboardStats = async (req, res, next) => {
 
 export const getRecentTasks = async (req, res, next) => {
     try {
-
         const tasks = await dashboardService.getRecentTasks();
-
-        return res.status(200).json({
-            success: true,
-            data: tasks
-        });
-
+        return res.status(200).json({ success: true, data: tasks });
     } catch (error) {
         next(error);
     }
@@ -32,14 +21,8 @@ export const getRecentTasks = async (req, res, next) => {
 
 export const getUpcomingEvents = async (req, res, next) => {
     try {
-
         const events = await dashboardService.getUpcomingEvents();
-
-        return res.status(200).json({
-            success: true,
-            data: events
-        });
-
+        return res.status(200).json({ success: true, data: events });
     } catch (error) {
         next(error);
     }
@@ -47,14 +30,8 @@ export const getUpcomingEvents = async (req, res, next) => {
 
 export const getRecentRequests = async (req, res, next) => {
     try {
-
         const requests = await dashboardService.getRecentRequests();
-
-        return res.status(200).json({
-            success: true,
-            data: requests
-        });
-
+        return res.status(200).json({ success: true, data: requests });
     } catch (error) {
         next(error);
     }
@@ -62,14 +39,26 @@ export const getRecentRequests = async (req, res, next) => {
 
 export const getRecentMessages = async (req, res, next) => {
     try {
-
         const messages = await dashboardService.getRecentMessages();
+        return res.status(200).json({ success: true, data: messages });
+    } catch (error) {
+        next(error);
+    }
+};
 
-        return res.status(200).json({
-            success: true,
-            data: messages
-        });
+export const getWeeklyActivity = async (req, res, next) => {
+    try {
+        const data = await dashboardService.getWeeklyActivity();
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
 
+export const getTeamOverview = async (req, res, next) => {
+    try {
+        const data = await dashboardService.getTeamOverview();
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         next(error);
     }

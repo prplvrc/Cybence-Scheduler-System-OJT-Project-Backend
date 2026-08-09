@@ -1,114 +1,58 @@
 import prisma from "../config/prisma.js";
 
-export const getDashboardStats = async () => {
+// Keep your existing getDashboardStats, getRecentTasks, etc.
 
-    const totalUsers = await prisma.user.count();
+export const getWeeklyActivity = async () => {
+    // Get date 7 days ago
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const totalTasks = await prisma.task.count();
-
-    const pendingTasks = await prisma.task.count({
+    const tasks = await prisma.task.findMany({
         where: {
-            status: "Pending"
-        }
-    });
-
-    const completedTasks = await prisma.task.count({
-        where: {
-            status: "Completed"
-        }
-    });
-
-    const totalRequests = await prisma.request.count();
-
-    const pendingRequests = await prisma.request.count({
-        where: {
-            status: "Pending"
-        }
-    });
-
-    const approvedRequests = await prisma.request.count({
-        where: {
-            status: "Approved"
-        }
-    });
-
-    const rejectedRequests = await prisma.request.count({
-        where: {
-            status: "Rejected"
-        }
-    });
-
-    const totalMessages = await prisma.message.count();
-
-    const totalEvents = await prisma.calendarEvent.count();
-
-    return {
-        totalUsers,
-        totalTasks,
-        pendingTasks,
-        completedTasks,
-        totalRequests,
-        pendingRequests,
-        approvedRequests,
-        rejectedRequests,
-        totalMessages,
-        totalEvents
-    };
-};
-
-
-export const getRecentTasks = async () => {
-    return await prisma.task.findMany({
-        take: 5,
-        orderBy: {
-            createdAt: "desc"
+            createdAt: { gte: sevenDaysAgo }
         },
-        include: {
-            user: true
+        select: {
+            createdAt: true,
+            status: true
         }
     });
+
+    const daysMap = { 0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat" };
+    const activity = { Mon: { completed: 0, ongoing: 0, created: 0 }, Tue: { completed: 0, ongoing: 0, created: 0 }, Wed: { completed: 0, ongoing: 0, created: 0 }, Thu: { completed: 0, ongoing: 0, created: 0 }, Fri: { completed: 0, ongoing: 0, created: 0 }, Sat: { completed: 0, ongoing: 0, created: 0 }, Sun: { completed: 0, ongoing: 0, created: 0 } };
+
+    tasks.forEach(task => {
+        const dayName = daysMap[new Date(task.createdAt).getDay()];
+        if (activity[dayName]) {
+            activity[dayName].created += 1;
+            if (task.status === "Completed") activity[dayName].completed += 1;
+            if (task.status === "Ongoing") activity[dayName].ongoing += 1;
+        }
+    });
+
+    return Object.keys(activity).map(day => ({ day, ...activity[day] }));
 };
 
-
-export const getUpcomingEvents = async () => {
-    return await prisma.calendarEvent.findMany({
-        where: {
-            startDate: {
-                gte: new Date()
+export const getTeamOverview = async () => {
+    const users = await prisma.user.findMany({
+        select: {
+            id: true,
+            name: true,
+            role: true,
+            assignedTasks: { // Adjust relation name if needed (e.g. tasks)
+                select: { status: true }
             }
-        },
-        take: 5,
-        orderBy: {
-            startDate: "asc"
-        },
-        include: {
-            user: true
         }
     });
-};
 
+    return users.map(user => {
+        const total = user.assignedTasks.length;
+        const completed = user.assignedTasks.filter(t => t.status === "Completed").length;
+        const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-export const getRecentRequests = async () => {
-    return await prisma.request.findMany({
-        take: 5,
-        orderBy: {
-            createdAt: "desc"
-        },
-        include: {
-            user: true
-        }
-    });
-};
-
-
-export const getRecentMessages = async () => {
-    return await prisma.message.findMany({
-        take: 5,
-        orderBy: {
-            createdAt: "desc"
-        },
-        include: {
-            sender: true
-        }
+        return {
+            name: user.name,
+            role: user.role || "Member",
+            progress: `${progressPercent}%`
+        };
     });
 };
