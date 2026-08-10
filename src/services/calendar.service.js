@@ -1,13 +1,13 @@
 import prisma from "../config/prisma.js";
 
-export const createEvent = async (eventData) => {
+export const createEvent = async (eventData, createdBy) => {
     return await prisma.calendarEvent.create({
         data: {
             title: eventData.title,
             description: eventData.description,
             startDate: new Date(eventData.startDate),
             endDate: new Date(eventData.endDate),
-            createdBy: Number(eventData.createdBy)
+            createdBy: Number(createdBy)
         },
         include: {
             user: {
@@ -21,21 +21,40 @@ export const createEvent = async (eventData) => {
     });
 };
 
-export const getAllEvents = async () => {
+export const getAllEvents = async (userId) => {
+
     return await prisma.calendarEvent.findMany({
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true
-                }
-            }
+
+        where: {
+            createdBy: Number(userId)
         },
+
+        include: {
+
+            user: {
+
+                select: {
+
+                    id: true,
+
+                    name: true,
+
+                    email: true
+
+                }
+
+            }
+
+        },
+
         orderBy: {
+
             startDate: "asc"
+
         }
+
     });
+
 };
 
 export const getEventById = async (id) => {

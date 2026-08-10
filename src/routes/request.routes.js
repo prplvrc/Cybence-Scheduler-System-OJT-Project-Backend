@@ -1,47 +1,15 @@
 import express from "express";
-
-import auth from "../middleware/auth.js";
-
-import {
-    createRequest,
-    getAllRequests,
-    getRequestById,
-    updateRequest,
-    deleteRequest,
-    approveRequest,
-    rejectRequest
-} from "../controllers/request.controller.js";
-
+import * as requestController from "../controllers/request.controller.js";
 
 const router = express.Router();
 
+router.get("/", requestController.getRequests);
+router.get("/:id", requestController.getRequestById);
+router.post("/", requestController.createRequest);
+router.put("/:id", requestController.updateRequest);
+router.delete("/:id", requestController.deleteRequest);
 
-// Create request
-router.post("/", auth, createRequest);
-
-
-// Get all requests
-router.get("/", auth, getAllRequests);
-
-
-// Get request by ID
-router.get("/:id", auth, getRequestById);
-
-
-// Update request
-router.put("/:id", auth, updateRequest);
-
-
-// Delete request
-router.delete("/:id", auth, deleteRequest);
-
-
-// Approve request
-router.patch("/:id/approve", auth, approveRequest);
-
-
-// Reject request
-router.patch("/:id/reject", auth, rejectRequest);
-
+router.patch("/:id/approve", requestController.approveRequest);
+router.patch("/:id/reject", requestController.rejectRequest);
 
 export default router;

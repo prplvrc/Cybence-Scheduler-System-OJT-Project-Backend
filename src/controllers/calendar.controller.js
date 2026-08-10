@@ -3,7 +3,10 @@ import * as calendarService from "../services/calendar.service.js";
 export const createEvent = async (req, res, next) => {
     try {
 
-        const event = await calendarService.createEvent(req.body);
+        const event = await calendarService.createEvent(
+            req.body,
+            req.user.id
+        );
 
         return res.status(201).json({
             success: true,
@@ -19,7 +22,7 @@ export const createEvent = async (req, res, next) => {
 export const getAllEvents = async (req, res, next) => {
     try {
 
-        const events = await calendarService.getAllEvents();
+        const events = await calendarService.getAllEvents(req.user.id);
 
         return res.status(200).json({
             success: true,
