@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 
+const JWT_SECRET = process.env.JWT_SECRET || "replace_with_a_long_random_secret";
+
 export const generateToken = (user) => {
     return jwt.sign(
         {
@@ -7,7 +9,7 @@ export const generateToken = (user) => {
             email: user.email,
             role: user.role
         },
-        process.env.JWT_SECRET,
+        JWT_SECRET,
         {
             expiresIn: "7d"
         }
