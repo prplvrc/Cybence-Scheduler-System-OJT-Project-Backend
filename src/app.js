@@ -7,17 +7,19 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  "https://cybence-scheduler-system-ojt-projec.vercel.app"
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5174",
-      "https://cybence-scheduler-system-ojt-projec.vercel.app"
-    ],
+    origin: allowedOrigins,
     credentials: true
   })
 );
 
 app.use(express.json());
+
 app.use("/api", routes);
 
 export default app;
